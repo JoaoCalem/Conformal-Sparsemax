@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Classifier(nn.Module):
+class CNN(nn.Module):
     def __init__(self, loss='softmax', n_classes=10, input_size=28, channels=1, kernel=5, padding=0):
         super().__init__() 
         size_adjust = 2*padding-kernel+1
