@@ -6,9 +6,9 @@ from torch.utils.data import DataLoader
 def get_data(valid_ratio, batch_size):
     transform = transforms.Compose(
         [transforms.ToTensor(),
-        transforms.Normalize(0.5, 0.5)])
+        transforms.Normalize(0.5, 0.5, 0.5)])
 
-    train_valid_dataset = torchvision.datasets.MNIST(
+    train_valid_dataset = torchvision.datasets.CIFAR100(
         root="data",
         train=True,
         download=True,
@@ -16,7 +16,7 @@ def get_data(valid_ratio, batch_size):
     )
 
 
-    test_dataset = torchvision.datasets.MNIST(
+    test_dataset = torchvision.datasets.CIFAR100(
         root="data",
         train=False,
         download=True,

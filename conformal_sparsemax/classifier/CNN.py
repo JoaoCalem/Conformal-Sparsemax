@@ -2,10 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from entmax import sparsemax
+from entmax import sparsemax, entmax15
 
 class CNN(nn.Module):
-    def __init__(self, loss='softmax', n_classes=10, input_size=28, channels=1, kernel=5, padding=0):
+    def __init__(self, loss='softmax', n_classes=100, input_size=32, channels=3, kernel=5, padding=0):
         super().__init__() 
         size_adjust = 2*padding-kernel+1
         self.conv1 = nn.Conv2d(channels, 8, kernel)
@@ -17,6 +17,8 @@ class CNN(nn.Module):
             self.final = lambda x: nn.LogSoftmax(-1)(x)
         elif loss=='sparsemax':
             self.final = lambda x: sparsemax(x,-1)
+        elif loss=='entmax15':
+            self.final = lambda x: entmax15(x,-1)
         else:
             raise Exception("Parameter 'loss' must be 'softmax' or 'sparsemax'")
     
