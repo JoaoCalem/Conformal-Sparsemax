@@ -9,24 +9,27 @@ from sklearn.metrics import f1_score
 
 def evaluate(model, dataloader, criterion):
     
-    predicted_labels=[]
+    pred_proba=[]
+    pred_labels=[]
     true_labels = []
     losses = []
     with torch.no_grad():
         for data in dataloader:
             x, y = data
             outputs = model(x)
-            predicted_labels.append(outputs.argmax(dim=-1).numpy())
+            pred_proba.append(outputs)
+            pred_labels.append(outputs.argmax(dim=-1).numpy())
             true_labels.append(y.numpy())
             
             losses.append(criterion(outputs, y))
                 
-    predicted_labels = np.concatenate(predicted_labels)
+    pred_proba = np.concatenate(pred_proba)
+    pred_labels = np.concatenate(pred_labels)
     true_labels = np.concatenate(true_labels)
     
     loss = torch.tensor(losses).mean().item()
     
-    return predicted_labels, true_labels, loss
+    return pred_proba, pred_labels, true_labels, loss
 
 def train(model,
         train_dataloader,
