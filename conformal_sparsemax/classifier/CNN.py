@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from entmax import sparsemax
+
 class CNN(nn.Module):
     def __init__(self, loss='softmax', n_classes=10, input_size=28, channels=1, kernel=5, padding=0):
         super().__init__() 
@@ -11,6 +13,12 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(8, 16, kernel)
         self.fc1 = nn.Linear(16 * (size_adjust+(input_size+size_adjust)//2)**2, 512)
         self.fc2 = nn.Linear(512, n_classes)
+        if loss=='softmax':
+            self.final = lambda x: nn.LogSoftmax(-1)(x)
+        elif loss=='sparsemax':
+            self.final = lambda x: sparsemax(x,-1)
+        else:
+            raise Exception("Parameter 'loss' must be 'softmax' or 'sparsemax'")
     
     def forward(self,x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -18,4 +26,5 @@ class CNN(nn.Module):
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
+        x = self.final(x)
         return x

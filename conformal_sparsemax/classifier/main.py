@@ -81,8 +81,11 @@ def train(model,
         val_history.append(val_loss)
         f1_history.append(f1)
         
-        if early_stopper.early_stop(val_loss):             
+        final_model = early_stopper.early_stop(val_loss, model)
+        if final_model:             
             break
+    if not final_model:
+        final_model = model
         
     print('-- Finished Training --')
-    return train_history, val_history, f1_history
+    return final_model, train_history, val_history, f1_history
