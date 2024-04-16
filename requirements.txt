@@ -1,7 +1,7 @@
 torchvision
 torch
 aif360[LawSchoolGPA]
-sklearn
+scikit-learn
 numpy
 pandas
 matplotlib
