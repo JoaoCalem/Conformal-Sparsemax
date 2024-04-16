@@ -1,6 +1,6 @@
 torchvision
 torch
-aif360
+aif360[LawSchoolGPA]
 sklearn
 numpy
 pandas
