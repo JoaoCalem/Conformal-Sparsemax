@@ -1,7 +1,7 @@
 torchvision
 torch
 aif360
-sklearn
+scikit-learn
 numpy
 pandas
 matplotlib
