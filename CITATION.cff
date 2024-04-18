@@ -8,6 +8,6 @@ authors:
     family-names: Campos
   - given-names: Sophia
     family-names: Sklaviadis
-title:"Conformal prediction with sparse scores and Fenchel-Young losses"
+title: "Conformal prediction with sparse scores and Fenchel-Young losses"
 doi: 10.5281/zenodo.10991745
 URL: "https://github.com/JoaoCalem/Conformal-Sparsemax"
