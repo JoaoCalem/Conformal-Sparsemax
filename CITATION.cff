@@ -1,10 +1,6 @@
 cff-version: 1.2.0
-title: >-
-  Conformal prediction with sparse scores and Fenchel-Young
-  losses
-message: >-
-  If you use this software, please cite it using the
-  metadata from this file.
+title:"Conformal prediction with sparse scores and Fenchel-Young losses"
+message: "If you use this software, please cite it using the metadata from this file."
 type: software
 authors:
   - given-names: João
@@ -13,6 +9,5 @@ authors:
     family-names: Campos
   - given-names: Sophia
     family-names: Sklaviadis
-identifiers:
-  - type: doi
-    value: 10.5281/zenodo.10991745
+doi: 10.5281/zenodo.10991745
+URL: "https://github.com/JoaoCalem/Conformal-Sparsemax"
