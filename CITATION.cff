@@ -1,1 +1,17 @@
-
+title: >-
+  Conformal prediction with sparse scores and Fenchel-Young
+  losses
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: João
+    family-names: Cálem
+  - given-names: Margarida
+    family-names: Campos
+  - given-names: Sophia
+    family-names: Sklaviadis
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.10991745
