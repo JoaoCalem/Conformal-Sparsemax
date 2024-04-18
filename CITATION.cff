@@ -1,3 +1,4 @@
+cff-version: 1.2.0
 title: >-
   Conformal prediction with sparse scores and Fenchel-Young
   losses
