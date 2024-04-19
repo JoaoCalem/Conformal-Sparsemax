@@ -72,7 +72,7 @@ def train(model,
         train_loss = torch.tensor(train_losses).mean().item()
         print(f'train_loss: {train_loss:.3f}')
             
-        predicted_labels, true_labels, val_loss = evaluate(model,
+        _, predicted_labels, true_labels, val_loss = evaluate(model,
                                                         dev_dataloader,
                                                         criterion)
         print(f'val_loss: {val_loss:.3f}')

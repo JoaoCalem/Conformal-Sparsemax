@@ -3,12 +3,23 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-def get_data(valid_ratio, batch_size):
+def get_data(valid_ratio, batch_size, calibration_samples=1000, dataset='CIFAR100'):
+    
+    if dataset=='CIFAR100':
+        data_class = torchvision.datasets.CIFAR100
+        normalize = transforms.Normalize(0.5, 0.5, 0.5)
+        
+    elif dataset=='MNIST':
+        data_class = torchvision.datasets.MNIST
+        normalize = transforms.Normalize(0.5, 0.5)
+    else:
+        raise Exception("Variable 'dataset' must be 'CIFAR100' or 'MNIST'")
+        
     transform = transforms.Compose(
         [transforms.ToTensor(),
-        transforms.Normalize(0.5, 0.5, 0.5)])
+        normalize])
 
-    train_valid_dataset = torchvision.datasets.CIFAR100(
+    train_valid_dataset = data_class(
         root="data",
         train=True,
         download=True,
@@ -16,11 +27,15 @@ def get_data(valid_ratio, batch_size):
     )
 
 
-    test_dataset = torchvision.datasets.CIFAR100(
+    test_dataset = data_class(
         root="data",
         train=False,
         download=True,
         transform=transform
+    )
+    
+    train_valid_dataset, cal_dataset = torch.utils.data.dataset.random_split(
+        train_valid_dataset, [len(train_valid_dataset)-calibration_samples, calibration_samples]
     )
     
     nb_train = int((1.0 - valid_ratio) * len(train_valid_dataset))
@@ -35,5 +50,6 @@ def get_data(valid_ratio, batch_size):
     )
     dev_dataloader = DataLoader(dev_dataset, batch_size=batch_size)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
+    cal_dataloader = DataLoader(cal_dataset, batch_size=batch_size)
     
-    return train_dataloader, dev_dataloader, test_dataloader
+    return train_dataloader, dev_dataloader, test_dataloader, cal_dataloader
