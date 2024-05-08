@@ -14,7 +14,7 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(16 * (size_adjust+(input_size+size_adjust)//2)**2, 512)
         self.fc2 = nn.Linear(512, n_classes)
         if loss=='softmax':
-            self.final = lambda x: nn.LogSoftmax(-1)(x)
+            self.final = lambda x: nn.Softmax(-1)(x)
         elif loss=='sparsemax':
             self.final = lambda x: sparsemax(x,-1)
         elif loss=='entmax15':
