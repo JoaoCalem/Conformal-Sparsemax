@@ -5,15 +5,16 @@ import numpy as np
 import pickle
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 
-loss = 'sparsemax' #sparsemax, softmax or entmax15
-dataset='CIFAR100' #CIFAR100 or MNIST
+loss = 'softmax' #sparsemax, softmax or entmax15
+transformation = 'softmax'
+dataset='MNIST' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 if dataset == 'CIFAR100':
-    model = CNN_CIFAR(loss).to(device)
+    model = CNN_CIFAR(transformation).to(device)
 elif dataset == 'MNIST':
-    model = CNN(loss,n_classes=10,input_size=28,channels=1).to(device)
+    model = CNN(transformation,n_classes=10,input_size=28,channels=1).to(device)
 else:
     raise Exception('Wrong dataset name')
 
@@ -56,10 +57,18 @@ test_true_enc[np.arange(test_true.size),test_true] = 1
 cal_true_enc = np.zeros((cal_true.size, cal_true.max()+1), dtype=int)
 cal_true_enc[np.arange(cal_true.size),cal_true] = 1
 
+
+
 predictions = {'test':{'proba':test_proba,'true':test_true_enc},
  'cal':{'proba':cal_proba,'true':cal_true_enc}}
 
+loss = "NLLLoss" if loss=="softmax" else "FYLoss"
 for dataset_type in ['cal','test']:
-    for y in ['proba','true']:
-        with open(f'predictions/{dataset}_{loss}_{dataset_type}_{y}.pickle', 'wb') as f:
-            pickle.dump(predictions[dataset_type][y], f)
+    with open(f'predictions/{dataset}_{dataset_type}_true.pickle', 'wb') as f:
+        pickle.dump(predictions[dataset_type]['true'], f)
+    with open(
+        f'predictions/{dataset}_{dataset_type}_{loss}' +
+            f'_{transformation}_{"proba"}.pickle'
+        , 'wb'
+    ) as f:
+        pickle.dump(predictions[dataset_type]["proba"], f)
