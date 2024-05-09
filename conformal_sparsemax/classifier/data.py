@@ -3,7 +3,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-def get_data(valid_ratio, batch_size, calibration_samples=1000, dataset='CIFAR100'):
+def get_data(valid_ratio, batch_size, calibration_samples=3000, dataset='CIFAR100'):
     
     if dataset=='CIFAR100':
         data_class = torchvision.datasets.CIFAR100
@@ -34,14 +34,19 @@ def get_data(valid_ratio, batch_size, calibration_samples=1000, dataset='CIFAR10
         transform=transform
     )
     
+    gen = torch.Generator()
+    gen.manual_seed(0)
+    
     train_valid_dataset, cal_dataset = torch.utils.data.dataset.random_split(
-        train_valid_dataset, [len(train_valid_dataset)-calibration_samples, calibration_samples]
+        train_valid_dataset, 
+        [len(train_valid_dataset)-calibration_samples, calibration_samples],
+        generator=gen
     )
     
     nb_train = int((1.0 - valid_ratio) * len(train_valid_dataset))
     nb_valid = int(valid_ratio * len(train_valid_dataset))
     train_dataset, dev_dataset = torch.utils.data.dataset.random_split(
-        train_valid_dataset, [nb_train, nb_valid]
+        train_valid_dataset, [nb_train, nb_valid], generator=gen
     )
     
     
