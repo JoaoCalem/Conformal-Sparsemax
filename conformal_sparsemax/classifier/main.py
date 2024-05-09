@@ -45,7 +45,7 @@ def train(model,
         patience=3):
 
     early_stopper = EarlyStopper(patience=patience)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)#, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
     
     train_history = []
     val_history = []
