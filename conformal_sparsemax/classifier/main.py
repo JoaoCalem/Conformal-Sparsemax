@@ -7,19 +7,25 @@ from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import f1_score
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 def evaluate(model, dataloader, criterion):
     
     pred_proba=[]
     pred_labels=[]
     true_labels = []
     losses = []
+    
+    to_numpy = lambda x: x.cpu().numpy() if device=="cuda" else x.numpy()
     with torch.no_grad():
         for data in dataloader:
             x, y = data
+            x = x.to(device)
+            y = y.to(device)
             outputs = model(x)
-            pred_proba.append(outputs)
-            pred_labels.append(outputs.argmax(dim=-1).numpy())
-            true_labels.append(y.numpy())
+            pred_proba.append(to_numpy(outputs))
+            pred_labels.append(to_numpy(outputs.argmax(dim=-1)))
+            true_labels.append(to_numpy(y))
             
             losses.append(criterion(outputs, y))
                 
@@ -38,8 +44,8 @@ def train(model,
         epochs=15,
         patience=3):
 
-    early_stopper = EarlyStopper(patience=3)
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    early_stopper = EarlyStopper(patience=patience)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)#, momentum=0.9)
     
     train_history = []
     val_history = []
@@ -54,6 +60,8 @@ def train(model,
         for _, data in tqdm(enumerate(train_dataloader, 0)):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()
