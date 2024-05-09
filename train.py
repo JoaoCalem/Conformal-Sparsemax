@@ -30,8 +30,8 @@ model, train_history, val_history, f1_history = train(model,
                                             train_dataloader,
                                             dev_dataloader,
                                             criterion,
-                                            epochs=350,
-                                            patience=20)
+                                            epochs=300,
+                                            patience=100)
 
 _, predicted_labels, true_labels, test_loss = evaluate(
                                                     model,

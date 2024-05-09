@@ -11,6 +11,8 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def evaluate(model, dataloader, criterion):
     
+    model.eval()
+    
     pred_proba=[]
     pred_labels=[]
     true_labels = []
@@ -22,7 +24,8 @@ def evaluate(model, dataloader, criterion):
             x, y = data
             x = x.to(device)
             y = y.to(device)
-            outputs = model(x)
+            with torch.no_grad():
+                outputs = model(x)
             pred_proba.append(to_numpy(outputs))
             pred_labels.append(to_numpy(outputs.argmax(dim=-1)))
             true_labels.append(to_numpy(y))
@@ -35,6 +38,8 @@ def evaluate(model, dataloader, criterion):
     
     loss = torch.tensor(losses).mean().item()
     
+    model.train()
+
     return pred_proba, pred_labels, true_labels, loss
 
 def train(model,

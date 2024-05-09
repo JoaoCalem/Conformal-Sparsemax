@@ -25,14 +25,13 @@ elif loss == 'entmax15':
     criterion = Entmax15Loss()
 elif loss == 'softmax':
     criterion = torch.nn.NLLLoss()
-    
 test_proba, test_pred, test_true, test_loss = evaluate(
                                                     model,
                                                     test_dataloader,
                                                     criterion)
 
-test_f1 = f1_score(test_pred, test_true, average='weighted')
-test_acc = accuracy_score(test_pred, test_true)
+test_f1 = f1_score(test_true, test_pred, average='weighted')
+test_acc = accuracy_score(test_true, test_pred)
 
 print(f'Test loss: {test_loss:.3f}')
 print(f'Test f1: {test_f1:.3f}')
@@ -43,8 +42,8 @@ cal_proba, cal_pred, cal_true, cal_loss = evaluate(
                                                     cal_dataloader,
                                                     criterion)
 
-cal_f1 = f1_score(cal_pred, cal_true, average='weighted')
-cal_acc = accuracy_score(cal_pred, cal_true)
+cal_f1 = f1_score(cal_true, cal_pred, average='weighted')
+cal_acc = accuracy_score(cal_true, cal_pred)
 
 print(f'Calibration loss: {cal_loss:.3f}')
 print(f'Calibration f1: {cal_f1:.3f}')
