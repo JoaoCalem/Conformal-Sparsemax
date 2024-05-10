@@ -1,6 +1,5 @@
 torchvision
 torch
-aif360[LawSchoolGPA]
 scikit-learn
 numpy
 pandas
