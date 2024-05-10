@@ -60,8 +60,9 @@ class CNN_CIFAR(nn.Module):
         self.fc1 = nn.Linear(8192, 1024)
         self.bn7 = nn.BatchNorm1d(1024,0.005,0.95)
         self.fc2 = nn.Linear(1024, n_classes)
+        self.transformation = transformation
         if transformation=='softmax':
-            self.final = lambda x: nn.Softmax(-1)(x)
+            self.final = lambda x: nn.LogSoftmax(-1)(x)
         elif transformation=='sparsemax':
             self.final = lambda x: sparsemax(x,-1)
         else:
@@ -84,3 +85,14 @@ class CNN_CIFAR(nn.Module):
         x = self.fc2(x)
         x = self.final(x)
         return x
+    
+    def eval(self):
+        super().eval()
+        if self.transformation=='softmax':
+            self.final = lambda x: nn.Softmax(-1)(x)
+    
+    def train(self, mode=True):
+        super().train(mode)
+        if self.transformation=='softmax':
+            self.final = lambda x: nn.LogSoftmax(-1)(x)
+        
