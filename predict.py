@@ -5,9 +5,9 @@ import numpy as np
 import pickle
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 
-loss = 'softmax' #sparsemax, softmax or entmax15
-transformation = 'softmax'
-dataset='MNIST' #CIFAR100 or MNIST
+loss = 'sparsemax' #sparsemax, softmax or entmax15
+transformation = 'sparsemax'
+dataset='CIFAR100' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

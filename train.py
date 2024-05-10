@@ -6,15 +6,13 @@ import torch
 from torch import nn
 from sklearn.metrics import f1_score
 
-loss = 'sparsemax' #sparsemax or softmax
+loss = 'softmax' #sparsemax or softmax
 dataset = 'CIFAR100' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 if loss == 'sparsemax':
     criterion = SparsemaxLoss()
-elif loss == 'entmax15':
-    criterion = Entmax15Loss()
 elif loss == 'softmax':
     criterion = torch.nn.NLLLoss()
 train_dataloader, dev_dataloader, test_dataloader, _ = get_data(0.2,16,dataset = dataset)
