@@ -99,6 +99,54 @@ class BetaGaussianLM(BetaGaussianModel):
         return self.pred_y(x).squeeze()
 
 
+class BetaGaussianQuad(BetaGaussianModel):
+    def __init__(self, input_size, uncertainty=False,
+                 bias_y=True,
+                 heteroscedastic=False, alpha=1.0):
+        super().__init__()
+        self.input_size = input_size
+        self.uncertainty = uncertainty
+        self.heteroscedastic = heteroscedastic
+        self.alpha = alpha
+
+        self.lin = torch.nn.Linear(self.input_size, 1, bias=bias_y)
+        self.quad = torch.nn.Linear(self.input_size, 1, bias=bias_y)
+
+
+        if self.heteroscedastic:
+            assert(self.uncertainty)
+            self.pred_sigma_sq = torch.nn.Linear(self.input_size, 1, bias=True)
+            self.pred_sigma_sq.weight.data[:] = self.pred_sigma_sq.weight.data ** 2
+            self.pred_sigma_sq.bias.data[:] = self.pred_sigma_sq.bias.data ** 2
+
+        elif self.uncertainty:
+            self.sigma_sq = torch.nn.Parameter(torch.randn(1))
+
+    def forward(self, x):
+        pred_y = (self.lin(x)+ self.quad(torch.square(x))).squeeze() 
+
+        if self.uncertainty:
+            if self.heteroscedastic:
+                pred_sigma_sq = self.pred_sigma_sq(x).squeeze() 
+            else:
+                pred_sigma_sq = self.sigma_sq.repeat(pred_y.shape[0])
+
+            # pred_log_sigma_sq = log_softplus(pred_log_sigma_sq)
+            # pred_sigma_sq = torch.clip(pred_sigma_sq, min=0.01, max=100)
+            
+            
+            # pred_sigma_sq = torch.nn.functional.softplus(pred_sigma_sq)
+            pred_sigma_sq = pred_sigma_sq ** 2  # torch.clip(pred_sigma_sq, min=0)
+            
+            # pred_sigma_sq = torch.clip(pred_sigma_sq, max=200)
+            # pred_sigma_sq = 100 * torch.sigmoid(pred_sigma_sq)
+            return pred_y, pred_sigma_sq
+        else:
+            return pred_y
+
+    def predict(self, x):
+        return (self.lin(x)+ self.quad(torch.square(x))).squeeze() 
+
 class BetaGaussianMLP(BetaGaussianModel):
     """
     OUTDATED at the moment
