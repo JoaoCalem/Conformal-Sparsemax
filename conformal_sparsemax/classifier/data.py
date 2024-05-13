@@ -3,7 +3,7 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
-def get_data(valid_ratio, batch_size, calibration_samples=3000, dataset='CIFAR100'):
+def get_data(valid_ratio, batch_size, calibration_samples=3000, dataset='CIFAR100',norm=True):
     
     if dataset=='CIFAR100':
         data_class = torchvision.datasets.CIFAR100
@@ -18,10 +18,13 @@ def get_data(valid_ratio, batch_size, calibration_samples=3000, dataset='CIFAR10
         normalize = transforms.Normalize(0.5, 0.5)
     else:
         raise Exception("Variable 'dataset' must be 'CIFAR100' or 'MNIST'")
-        
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-        normalize])
+    
+    if norm:
+        transform = transforms.Compose(
+            [transforms.ToTensor(),
+            normalize])
+    else:
+        transform = transforms.Compose([transforms.ToTensor()])
 
     train_valid_dataset = data_class(
         root="data",

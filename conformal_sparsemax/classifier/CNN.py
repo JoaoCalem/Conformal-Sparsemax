@@ -34,6 +34,7 @@ class CNN(nn.Module):
         Number of convolutional layers done for every max pooling layer.
     batch_norm: bool = False
         Whether batch normalisation is applied after convolutions and in FFN
+        
     Methods
     -------
     forward:
