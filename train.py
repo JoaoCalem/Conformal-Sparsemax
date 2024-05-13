@@ -6,8 +6,8 @@ import torch
 from torch import nn
 from sklearn.metrics import f1_score
 
-loss = 'softmax' #sparsemax or softmax
-dataset = 'CIFAR100' #CIFAR100 or MNIST
+loss = 'sparsemax' #sparsemax or softmax
+dataset = 'CIFAR10' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -19,6 +19,8 @@ train_dataloader, dev_dataloader, test_dataloader, _ = get_data(0.2,16,dataset =
 
 if dataset == 'CIFAR100':
     model = CNN_CIFAR(loss).to(device)
+elif dataset == 'CIFAR10':
+    model = CNN_CIFAR(loss).to(device)
 elif dataset == 'MNIST':
     model = CNN(loss,n_classes=10,input_size=28,channels=1).to(device)
 else:
@@ -28,8 +30,8 @@ model, train_history, val_history, f1_history = train(model,
                                             train_dataloader,
                                             dev_dataloader,
                                             criterion,
-                                            epochs=300,
-                                            patience=50)
+                                            epochs=1,
+                                            patience=30)
 
 _, predicted_labels, true_labels, test_loss = evaluate(
                                                     model,

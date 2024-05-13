@@ -7,11 +7,13 @@ from entmax.losses import SparsemaxLoss, Entmax15Loss
 
 loss = 'sparsemax' #sparsemax, softmax or entmax15
 transformation = 'sparsemax'
-dataset='CIFAR100' #CIFAR100 or MNIST
+dataset='CIFAR10' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 if dataset == 'CIFAR100':
+    model = CNN_CIFAR(transformation).to(device)
+elif dataset == 'CIFAR10':
     model = CNN_CIFAR(transformation).to(device)
 elif dataset == 'MNIST':
     model = CNN(transformation,n_classes=10,input_size=28,channels=1).to(device)
