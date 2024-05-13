@@ -9,6 +9,10 @@ def get_data(valid_ratio, batch_size, calibration_samples=3000, dataset='CIFAR10
         data_class = torchvision.datasets.CIFAR100
         normalize = transforms.Normalize(0.5, 0.5, 0.5)
         
+    elif dataset=='CIFAR10':
+        data_class = torchvision.datasets.CIFAR10
+        normalize = transforms.Normalize(0.5, 0.5, 0.5)
+        
     elif dataset=='MNIST':
         data_class = torchvision.datasets.MNIST
         normalize = transforms.Normalize(0.5, 0.5)
