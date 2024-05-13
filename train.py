@@ -1,5 +1,5 @@
 
-from conformal_sparsemax.classifier import CNN, CNN_CIFAR, get_data,train,evaluate
+from conformal_sparsemax.classifier import CNN, get_data, train, evaluate
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 import json
 import torch
@@ -7,7 +7,7 @@ from torch import nn
 from sklearn.metrics import f1_score
 
 loss = 'sparsemax' #sparsemax or softmax
-dataset = 'CIFAR10' #CIFAR100 or MNIST
+dataset = 'MNIST' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -17,12 +17,22 @@ elif loss == 'softmax':
     criterion = torch.nn.NLLLoss()
 train_dataloader, dev_dataloader, test_dataloader, _ = get_data(0.2,16,dataset = dataset)
 
-if dataset == 'CIFAR100':
-    model = CNN_CIFAR(loss).to(device)
-elif dataset == 'CIFAR10':
-    model = CNN_CIFAR(loss).to(device)
+if dataset in ['CIFAR100', 'CIFAR10']:
+    model = CNN(100,
+                32,
+                3,
+                transformation=loss,
+                conv_channels=[256,512,512],
+                convs_per_pool=2,
+                batch_norm=True,
+                ffn_hidden_size=1024,
+                kernel=5,
+                padding=2).to(device)
 elif dataset == 'MNIST':
-    model = CNN(loss,n_classes=10,input_size=28,channels=1).to(device)
+    model = CNN(10,
+                28,
+                1,
+                transformation=loss).to(device)
 else:
     raise Exception('Wrong dataset name')
     
@@ -30,7 +40,7 @@ model, train_history, val_history, f1_history = train(model,
                                             train_dataloader,
                                             dev_dataloader,
                                             criterion,
-                                            epochs=1,
+                                            epochs=30,
                                             patience=30)
 
 _, predicted_labels, true_labels, test_loss = evaluate(
