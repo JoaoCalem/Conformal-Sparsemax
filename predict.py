@@ -1,22 +1,43 @@
-from conformal_sparsemax.classifier import CNN, CNN_CIFAR,get_data, evaluate
+from conformal_sparsemax.classifier import CNN, get_data, evaluate
 from sklearn.metrics import f1_score,accuracy_score
 import torch
 import numpy as np
 import pickle
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 
-loss = 'sparsemax' #sparsemax, softmax or entmax15
-transformation = 'sparsemax'
-dataset='CIFAR100' #CIFAR100 or MNIST
+loss = 'softmax' #sparsemax, softmax or entmax15
+transformation = 'softmax'
+dataset='CIFAR10' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 if dataset == 'CIFAR100':
-    model = CNN_CIFAR(transformation).to(device)
+    model = CNN(100,
+                32,
+                3,
+                transformation=transformation,
+                conv_channels=[256,512,512],
+                convs_per_pool=2,
+                batch_norm=True,
+                ffn_hidden_size=1024,
+                kernel=5,
+                padding=2).to(device)
+elif dataset == 'CIFAR10':
+    model = CNN(10,
+                32,
+                3,
+                transformation=transformation,
+                conv_channels=[256,512,512],
+                convs_per_pool=2,
+                batch_norm=True,
+                ffn_hidden_size=1024,
+                kernel=5,
+                padding=2).to(device)
 elif dataset == 'MNIST':
-    model = CNN(transformation,n_classes=10,input_size=28,channels=1).to(device)
-else:
-    raise Exception('Wrong dataset name')
+    model = CNN(10,
+                28,
+                1,
+                transformation=transformation).to(device)
 
 _,_, test_dataloader, cal_dataloader = get_data(0.2,16,dataset = dataset)
 model.load_state_dict(torch.load(f'models/{dataset}_{loss}.pth'))

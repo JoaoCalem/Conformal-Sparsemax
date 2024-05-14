@@ -1,98 +1,155 @@
+"""Joao Calem - CNN.py"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from entmax import sparsemax, entmax15
+from entmax import sparsemax
+
+from typing import List
 
 class CNN(nn.Module):
-    def __init__(self, transformation='softmax', n_classes=100, input_size=32, channels=3, kernel=5, padding=0):
-        super().__init__() 
-        size_adjust = 2*padding-kernel+1
-        self.conv1 = nn.Conv2d(channels, 8, kernel)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(8, 16, kernel)
-        self.fc1 = nn.Linear(16 * (size_adjust+(input_size+size_adjust)//2)**2, 512)
-        self.fc2 = nn.Linear(512, n_classes)
-        if transformation=='softmax':
-            self.forward = self.softmax
-        elif transformation=='sparsemax':
-            self.forward = self.sparsemax
-        else:
-            raise Exception("Parameter 'transformation' must be 'softmax' or 'sparsemax'")
+    """
+    CNN Model for softmax or sparsemax transformations.
 
-    
-    def softmax(self,x):
-        x = self.logits(x)
-        x = nn.Softmax(-1)(x)
-        return x
-    
-    def sparsemax(self,x):
-        x = self.logits(x)
-        x = sparsemax(x,-1)
-        return x
-    
-    def logits(self,x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = F.relu(self.conv2(x))
-        x = torch.flatten(x, 1) # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
-    
-class CNN_CIFAR(nn.Module):
-    def __init__(self, transformation='softmax', n_classes=100, input_size=32, channels=3, kernel=3, padding=0):
+    Parameters
+    ----------
+    n_classes: int
+        Number of target classes.
+    input_size: int
+        Input width of image.
+    channels: int
+        Number of channels in input image.
+    transformation: str = 'softmax'
+        Transformation applied to end of model forward pass.
+    conv_channels: List[int] = [8,16]
+        List of variable size with number of channels at each convulation layer.
+    ffn_hidden_size: int = 32
+        Size of hidden layer in feed forward network (FFN).
+    kernel: int = 3
+        Kernel size of convolutional layers.
+    padding: int = 1
+        Padding applied to convolutional layers.
+    convs_per_pool: int = 1
+        Number of convolutional layers done for every max pooling layer.
+    batch_norm: bool = False
+        Whether batch normalisation is applied after convolutions and in FFN
+        
+    Methods
+    -------
+    forward:
+        Forward pass for specified transformation function on intitialisation.
+    train:
+        Set model to training mode.
+    eval:
+        Set model to evaluation mode.
+
+    Returns
+    -------
+    None
+    """
+    def __init__(self,
+            n_classes: int,
+            input_size: int,
+            channels: int,
+            transformation: str = 'softmax',
+            conv_channels: List[int] = [8,16],
+            ffn_hidden_size: int = 32,
+            kernel: int = 3,
+            padding: int = 1,
+            convs_per_pool: int = 1,
+            batch_norm: bool = False):
+        """
+        Constructor for CNN model
+        """
+        
         super().__init__() 
-        size_adjust = 2*padding-kernel+1
-        self.conv1 = nn.Conv2d(channels, 256, kernel,padding="same")
-        self.bn1 = nn.BatchNorm2d(256)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.dropout = nn.Dropout(0.2)
-        self.conv2 = nn.Conv2d(256, 256, kernel,padding="same")
-        self.bn2 = nn.BatchNorm2d(256)
-        self.conv3 = nn.Conv2d(256, 512, kernel,padding="same")
-        self.bn3 = nn.BatchNorm2d(512)
-        self.conv4 = nn.Conv2d(512, 512, kernel,padding="same")
-        self.bn4 = nn.BatchNorm2d(512)
-        self.conv5 = nn.Conv2d(512, 512, kernel,padding="same")
-        self.bn5 = nn.BatchNorm2d(512)
-        self.conv6 = nn.Conv2d(512, 512, kernel,padding="same")
-        self.bn6 = nn.BatchNorm2d(512)
-        self.fc1 = nn.Linear(8192, 1024)
-        self.bn7 = nn.BatchNorm1d(1024,0.005,0.95)
-        self.fc2 = nn.Linear(1024, n_classes)
-        self.transformation = transformation
-        if transformation=='softmax':
-            self.final = lambda x: nn.LogSoftmax(-1)(x)
-        elif transformation=='sparsemax':
-            self.final = lambda x: sparsemax(x,-1)
-        else:
-            raise Exception("Parameter 'transformation' must be 'softmax' or 'sparsemax'")
+        
+        self._convs_per_pool = convs_per_pool
+        self._convs = nn.ModuleList([])
+        self._batch_norms=nn.ModuleList([])
+        self._pool = nn.MaxPool2d(2, 2)
+        self._dropout = nn.Dropout(0.2)
+        self._b1d = None
+        self._transformation = transformation
+        
+        self._setup_convolutions(input_size, padding, kernel, channels, 
+            conv_channels, convs_per_pool, batch_norm)
+         
+        self._fc1 = nn.Linear((self._shape**2)*conv_channels[-1], ffn_hidden_size)
+        if batch_norm:
+            self._b1d = nn.BatchNorm1d(ffn_hidden_size,0.005,0.95)
+        self._fc2 = nn.Linear(ffn_hidden_size, n_classes)
+        
+        self.train()
     
-    def forward(self,x):
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = self.pool(F.relu(self.bn2(self.conv2(x))))
-        x = self.dropout(x)
-        x = F.relu(self.bn3(self.conv3(x)))
-        x = self.pool(F.relu(self.bn4(self.conv4(x))))
-        x = self.dropout(x)
-        x = F.relu(self.bn5(self.conv5(x)))
-        x = self.pool(F.relu(self.bn6(self.conv6(x))))
-        x = self.dropout(x)
+    def _setup_convolutions(self, input_size, padding, kernel,
+            channels, conv_channels, convs_per_pool, batch_norm):
+        """
+        Sets up structure of convolution and pooling layers of CNN.
+        Saves output shape of these layers in self._shape.
+        """
+        
+        channel_previous = channels
+        self._shape = input_size
+        size_adjust = 2*padding-kernel+1
+        
+        for channels in conv_channels:
+            for i in range(convs_per_pool):
+                self._convs.append(nn.Conv2d(channel_previous,
+                                            channels,
+                                            kernel,
+                                            padding=padding
+                                            ))
+                if batch_norm:
+                    self._batch_norms.append(nn.BatchNorm2d(channels))
+                channel_previous=channels
+                self._shape += size_adjust
+            self._shape = self._shape//2
+    
+    def forward(self, x):
+        """
+        Forward pass for specified transformation function on intitialisation.
+        """
+        
+        for i in range(0,len(self._convs),self._convs_per_pool):
+            for j in range(self._convs_per_pool):
+                if self._batch_norms:
+                    x = F.relu(self._batch_norms[i+j](self._convs[i+j](x)))
+                else:
+                    x = F.relu(self._convs[i+j](x))
+            x = self._dropout(self._pool(x))
+            16
         x = torch.flatten(x, 1) # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.bn7(x)
-        x = self.fc2(x)
-        x = self.final(x)
-        return x
+        
+        x = self._dropout(F.relu(self._fc1(x)))
+        if self._b1d:
+            x = self._b1d(x)
+        x = self._fc2(x)
+        
+        return self._final(x)
     
     def eval(self):
+        """
+        Set model to evaluation mode.
+        """
+        
         super().eval()
-        if self.transformation=='softmax':
-            self.final = lambda x: nn.Softmax(-1)(x)
+        if self._transformation=='softmax':
+            self._final = lambda x: nn.Softmax(-1)(x)
     
     def train(self, mode=True):
+        """
+        Set model to training mode.
+        """
+        
         super().train(mode)
-        if self.transformation=='softmax':
-            self.final = lambda x: nn.LogSoftmax(-1)(x)
+        if self._transformation=='softmax':
+            self._final = lambda x: nn.LogSoftmax(-1)(x)
+        elif self._transformation=='sparsemax':
+            self._final = lambda x: sparsemax(x,-1)
+        else:
+            raise Exception(
+                "Parameter 'transformation' must be 'softmax' or 'sparsemax'"
+                )
         
