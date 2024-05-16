@@ -112,12 +112,6 @@ class CNN(nn.Module):
         Forward pass for specified transformation function on intitialisation.
         """
         
-        return self._final(self.logits(x))
-    
-    def logits(self,x):
-        """
-        Get the logits of CNN forward pass.
-        """
         for i in range(0,len(self._convs),self._convs_per_pool):
             for j in range(self._convs_per_pool):
                 if self._batch_norms:
@@ -125,12 +119,15 @@ class CNN(nn.Module):
                 else:
                     x = F.relu(self._convs[i+j](x))
             x = self._dropout(self._pool(x))
+            16
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         
         x = self._dropout(F.relu(self._fc1(x)))
         if self._b1d:
             x = self._b1d(x)
-        return self._fc2(x)
+        x = self._fc2(x)
+        
+        return self._final(x)
     
     def eval(self):
         """
@@ -151,8 +148,10 @@ class CNN(nn.Module):
             self._final = lambda x: nn.LogSoftmax(-1)(x)
         elif self._transformation=='sparsemax':
             self._final = lambda x: sparsemax(x,-1)
+        elif self._transformation=='logits':
+            self._final = lambda x: x
         else:
             raise Exception(
-                "Parameter 'transformation' must be 'softmax' or 'sparsemax'"
+                "Parameter 'transformation' must be 'softmax', 'sparsemax' ot 'logits"
                 )
         

@@ -7,8 +7,8 @@ import numpy as np
 import pickle
 from entmax.losses import SparsemaxLoss
 
-loss = 'softmax' #sparsemax, softmax or entmax15
-transformation = 'softmax'
+loss = 'sparsemax' #sparsemax, softmax or entmax15
+transformation = 'logits'
 dataset='CIFAR10' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -18,7 +18,7 @@ if dataset in ['CIFAR100','CIFAR10']:
     model = CNN(n_class,
                 32,
                 3,
-                transformation=loss,
+                transformation=transformation,
                 conv_channels=[256,512,512],
                 convs_per_pool=2,
                 batch_norm=True,
@@ -29,7 +29,7 @@ if dataset == 'MNIST':
     model = CNN(10,
                 28,
                 1,
-                transformation=loss).to(device)
+                transformation=transformation).to(device)
 
 data_class = {
     'CIFAR100': CIFAR100,
@@ -47,7 +47,8 @@ elif loss == 'softmax':
 test_proba, test_pred, test_true, test_loss = evaluate(
                                                     model,
                                                     data.test,
-                                                    criterion)
+                                                    criterion,
+                                                    True)
 
 test_f1 = f1_score(test_true, test_pred, average='weighted')
 test_acc = accuracy_score(test_true, test_pred)
@@ -59,7 +60,8 @@ print(f'Test Accuracy: {test_acc:.3f}')
 cal_proba, cal_pred, cal_true, cal_loss = evaluate(
                                                     model,
                                                     data.cal,
-                                                    criterion)
+                                                    criterion,
+                                                    True)
 
 cal_f1 = f1_score(cal_true, cal_pred, average='weighted')
 cal_acc = accuracy_score(cal_true, cal_pred)
