@@ -137,7 +137,9 @@ class CNN(nn.Module):
         super().eval()
         if self._transformation=='softmax':
             self._final = lambda x: nn.Softmax(-1)(x)
-    
+        elif self._transformation=='sparsemax':
+            self._final = lambda x: sparsemax(x,-1)
+            
     def train(self, mode=True):
         """
         Set model to training mode.
@@ -146,9 +148,7 @@ class CNN(nn.Module):
         super().train(mode)
         if self._transformation=='softmax':
             self._final = lambda x: nn.LogSoftmax(-1)(x)
-        elif self._transformation=='sparsemax':
-            self._final = lambda x: sparsemax(x,-1)
-        elif self._transformation=='logits':
+        elif self._transformation in ['logits', 'sparsemax']:
             self._final = lambda x: x
         else:
             raise Exception(
