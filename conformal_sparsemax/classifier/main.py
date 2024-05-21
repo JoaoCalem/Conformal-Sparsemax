@@ -9,7 +9,7 @@ from sklearn.metrics import f1_score
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-def evaluate(model, dataloader, criterion):
+def evaluate(model, dataloader, criterion, logits=False):
     
     model.eval()
     
@@ -25,7 +25,10 @@ def evaluate(model, dataloader, criterion):
             x = x.to(device)
             y = y.to(device)
             with torch.no_grad():
-                outputs = model(x)
+                if logits:
+                    outputs = model.forward(x)
+                else:
+                    outputs = model(x)
             pred_proba.append(to_numpy(outputs))
             pred_labels.append(to_numpy(outputs.argmax(dim=-1)))
             true_labels.append(to_numpy(y))

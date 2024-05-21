@@ -38,7 +38,7 @@ class CNN(nn.Module):
     Methods
     -------
     forward:
-        Model forward for specified transformation function on intitialisation.
+        Forward pass for specified transformation function on intitialisation.
     train:
         Set model to training mode.
     eval:
@@ -59,6 +59,9 @@ class CNN(nn.Module):
             padding: int = 1,
             convs_per_pool: int = 1,
             batch_norm: bool = False):
+        """
+        Constructor for CNN model
+        """
         
         super().__init__() 
         
@@ -80,8 +83,12 @@ class CNN(nn.Module):
         
         self.train()
     
-    def _setup_convolutions(self, input_size, padding, kernel, channels, 
-            conv_channels, convs_per_pool, batch_norm):
+    def _setup_convolutions(self, input_size, padding, kernel,
+            channels, conv_channels, convs_per_pool, batch_norm):
+        """
+        Sets up structure of convolution and pooling layers of CNN.
+        Saves output shape of these layers in self._shape.
+        """
         
         channel_previous = channels
         self._shape = input_size
@@ -101,6 +108,10 @@ class CNN(nn.Module):
             self._shape = self._shape//2
     
     def forward(self, x):
+        """
+        Forward pass for specified transformation function on intitialisation.
+        """
+        
         for i in range(0,len(self._convs),self._convs_per_pool):
             for j in range(self._convs_per_pool):
                 if self._batch_norms:
@@ -119,18 +130,28 @@ class CNN(nn.Module):
         return self._final(x)
     
     def eval(self):
+        """
+        Set model to evaluation mode.
+        """
+        
         super().eval()
         if self._transformation=='softmax':
             self._final = lambda x: nn.Softmax(-1)(x)
-    
+        elif self._transformation=='sparsemax':
+            self._final = lambda x: sparsemax(x,-1)
+            
     def train(self, mode=True):
+        """
+        Set model to training mode.
+        """
+        
         super().train(mode)
         if self._transformation=='softmax':
             self._final = lambda x: nn.LogSoftmax(-1)(x)
-        elif self._transformation=='sparsemax':
-            self._final = lambda x: sparsemax(x,-1)
+        elif self._transformation in ['logits', 'sparsemax']:
+            self._final = lambda x: x
         else:
             raise Exception(
-                "Parameter 'transformation' must be 'softmax' or 'sparsemax'"
+                "Parameter 'transformation' must be 'softmax', 'sparsemax' ot 'logits"
                 )
         
