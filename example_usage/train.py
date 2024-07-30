@@ -7,8 +7,8 @@ import torch
 from torch import nn
 from sklearn.metrics import f1_score
 
-loss = 'sparsemax' #sparsemax or softmax
-dataset = 'CIFAR10' #CIFARx =100 or MNIST
+loss = 'softmax' #sparsemax or softmax
+dataset = 'CIFAR100' #CIFARx =100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
