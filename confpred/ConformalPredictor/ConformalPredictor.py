@@ -9,7 +9,10 @@ class ConformalPredictor():
         n_cal = cal_true.shape[0]
         cal_scores = self.score.get_single_score(cal_true,cal_pred)
         q_level = np.ceil((n_cal+1)*(1-alpha))/n_cal
-        self.q_hat = np.quantile(cal_scores, q_level, method = 'higher')
+        try:
+            self.q_hat = np.quantile(cal_scores, q_level, method = 'higher')
+        except TypeError:
+            self.q_hat = np.quantile(cal_scores, q_level, interpolation = 'higher')
     
     def predict(self, test_pred, disallow_empty = False):
         

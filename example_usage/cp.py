@@ -7,7 +7,7 @@ import torch
 
 loss = 'softmax' #sparsemax, softmax or entmax15
 transformation = 'logits'
-dataset='CIFAR10' #CIFAR100 or MNIST
+dataset='CIFAR100' #CIFAR100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -55,6 +55,6 @@ cal_proba, _, cal_true, _ = evaluate(
                                 criterion,
                                 True)
 
-cp = ConformalPredictor(SoftmaxScore())
+cp = ConformalPredictor(SparseScore(2))
 cp.calibrate(cal_true, cal_proba, 0.1)
 print(cp.evaluate(test_proba, test_true))
