@@ -1,5 +1,5 @@
-from conformal_sparsemax.classifier import CNN, evaluate
-from conformal_sparsemax.classifier.datasets import CIFAR10, CIFAR100, MNIST
+from confpred.classifier import CNN, evaluate
+from confpred.datasets import CIFAR10, CIFAR100, MNIST
 
 from sklearn.metrics import f1_score,accuracy_score
 import torch

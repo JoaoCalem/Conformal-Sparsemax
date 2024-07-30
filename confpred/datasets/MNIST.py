@@ -1,9 +1,9 @@
-from conformal_sparsemax.classifier.datasets import Datasets
+from confpred.datasets import Datasets
 
 import torchvision
 import torchvision.transforms as transforms
 
-class CIFAR10(Datasets):
+class MNIST(Datasets):
     def __init__(
             self,
             valid_ratio: float,
@@ -14,6 +14,6 @@ class CIFAR10(Datasets):
         super().__init__(valid_ratio, batch_size, calibration_samples, norm)
     
     def _dataset_class(self):
-        data_class = torchvision.datasets.CIFAR10
-        normalize = transforms.Normalize(0.5, 0.5, 0.5)
+        data_class = torchvision.datasets.MNIST
+        normalize = transforms.Normalize(0.5, 0.5)
         return data_class, normalize

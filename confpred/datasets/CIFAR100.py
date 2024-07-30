@@ -1,4 +1,4 @@
-from conformal_sparsemax.classifier.datasets import Datasets
+from confpred.datasets import Datasets
 
 import torchvision
 import torchvision.transforms as transforms

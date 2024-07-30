@@ -1,4 +1,4 @@
-from conformal_sparsemax.utils import EarlyStopper
+from confpred.utils import EarlyStopper
 
 import torch
 from torch import nn

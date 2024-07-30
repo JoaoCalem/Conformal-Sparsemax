@@ -1,6 +1,6 @@
 
-from conformal_sparsemax.classifier import CNN, train, evaluate
-from conformal_sparsemax.classifier.datasets import CIFAR10, CIFAR100, MNIST
+from confpred.classifier import CNN, train, evaluate
+from confpred.datasets import CIFAR10, CIFAR100, MNIST
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 import json
 import torch

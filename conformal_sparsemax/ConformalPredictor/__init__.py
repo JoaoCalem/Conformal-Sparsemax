@@ -1,1 +1,0 @@
-from conformal_sparsemax.ConformalPredictor.ConformalPredictor import ConformalPredictor,ConformalScore,SparseScore,SoftmaxScore
