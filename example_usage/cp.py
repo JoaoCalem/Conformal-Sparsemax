@@ -4,6 +4,7 @@ from confpred.datasets import CIFAR10, CIFAR100, MNIST
 
 from entmax.losses import SparsemaxLoss
 import torch
+import numpy as np
 
 loss = 'softmax' #sparsemax, softmax or entmax15
 transformation = 'logits'
@@ -55,6 +56,14 @@ cal_proba, _, cal_true, _ = evaluate(
                                 criterion,
                                 True)
 
+#One Hot Encoding
+test_true_enc = np.zeros((test_true.size, test_true.max()+1), dtype=int)
+test_true_enc[np.arange(test_true.size),test_true] = 1
+
+cal_true_enc = np.zeros((cal_true.size, cal_true.max()+1), dtype=int)
+cal_true_enc[np.arange(cal_true.size),cal_true] = 1
+
+#Conformal Prediction
 cp = ConformalPredictor(SparseScore(2))
-cp.calibrate(cal_true, cal_proba, 0.1)
-print(cp.evaluate(test_proba, test_true))
+cp.calibrate(cal_true_enc, cal_proba, 0.1)
+print(cp.evaluate(test_true_enc, test_proba))

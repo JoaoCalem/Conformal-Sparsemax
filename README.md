@@ -11,7 +11,7 @@ cp = ConformalPredictor(SparseScore())
 cp.calibrate(cal_true, cal_proba, alpha=0.1)
 
 cp.predict(test_pred) # To get conformal prediction sets
-cp.evaluate(test_proba, test_true) # To evaluate coverage and average set size
+cp.evaluate(test_true, test_proba) # To evaluate coverage and average set size
 ```
 
 For further usage examples with real datasets and models, see example_usage/

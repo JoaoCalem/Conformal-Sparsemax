@@ -26,7 +26,7 @@ class ConformalPredictor():
         
         return test_match
     
-    def evaluate(self, test_pred, test_true, disallow_empty = False):
+    def evaluate(self, test_true, test_pred, disallow_empty = False):
         n_test = test_pred.shape[0]
         test_match = self.predict(test_pred, disallow_empty)
         set_size = test_match.sum(axis = 1).mean()
