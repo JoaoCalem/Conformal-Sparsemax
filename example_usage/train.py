@@ -6,11 +6,29 @@ import json
 import torch
 from torch import nn
 from sklearn.metrics import f1_score
+import numpy as np
+import random 
+import os
 
-loss = 'softmax' #sparsemax or softmax
-dataset = 'CIFAR100' #CIFARx =100 or MNIST
+seed = 123
+np.random.seed(seed)
+random.seed(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+# When running on the CuDNN backend, two further options must be set
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+# Set a fixed value for the hash seed
+os.environ["PYTHONHASHSEED"] = str(seed)
+print(f"Random seed set as {seed}")
+
+
+
+loss = 'sparsemax' #sparsemax or softmax
+dataset = 'CIFAR10' #CIFARx =100 or MNIST
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(device)
 
 if loss == 'sparsemax':
     criterion = SparsemaxLoss()
@@ -48,7 +66,7 @@ model, train_history, val_history, f1_history = train(model,
                                             data.train,
                                             data.dev,
                                             criterion,
-                                            epochs=25,
+                                            epochs=2,
                                             patience=3)
 
 _, predicted_labels, true_labels, test_loss = evaluate(
