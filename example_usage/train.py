@@ -66,7 +66,7 @@ model, train_history, val_history, f1_history = train(model,
                                             data.train,
                                             data.dev,
                                             criterion,
-                                            epochs=25,
+                                            epochs=2,
                                             patience=3)
 
 _, predicted_labels, true_labels, test_loss = evaluate(
