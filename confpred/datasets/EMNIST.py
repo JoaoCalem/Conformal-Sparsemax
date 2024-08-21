@@ -3,7 +3,7 @@ from confpred.datasets import Datasets
 import torchvision
 import torchvision.transforms as transforms
 
-class MNIST(Datasets):
+class EMNIST(Datasets):
     def __init__(
             self,
             valid_ratio: float,
