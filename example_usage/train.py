@@ -28,6 +28,7 @@ print(f"Random seed set as {seed}")
 #dataset = 'CIFAR10' #CIFARx =100 or MNIST
 for loss in ['sparsemax','softmax','entmax']:
     for dataset in ['MNIST', 'CIFAR10', 'CIFAR100']:
+        print(loss, dataset)
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(device)
 
