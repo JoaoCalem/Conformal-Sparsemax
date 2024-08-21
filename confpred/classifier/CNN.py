@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from entmax import sparsemax
+from entmax import sparsemax, entmax15
 
 from typing import List
 
@@ -139,7 +139,8 @@ class CNN(nn.Module):
             self._final = lambda x: nn.Softmax(-1)(x)
         elif self._transformation=='sparsemax':
             self._final = lambda x: sparsemax(x,-1)
-            
+        elif self._transformation=='entmax':
+            self._final = lambda x: entmax15(x,-1)
     def train(self, mode=True):
         """
         Set model to training mode.
@@ -148,10 +149,11 @@ class CNN(nn.Module):
         super().train(mode)
         if self._transformation=='softmax':
             self._final = lambda x: nn.LogSoftmax(-1)(x)
-        elif self._transformation in ['logits', 'sparsemax']:
-            self._final = lambda x: x
+        #elif self._transformation in ['logits', 'sparsemax']:
         else:
-            raise Exception(
-                "Parameter 'transformation' must be 'softmax', 'sparsemax' ot 'logits"
-                )
+            self._final = lambda x: x
+        #else:
+        #    raise Exception(
+        #        "Parameter 'transformation' must be 'softmax', 'sparsemax' ot 'logits"
+        #        )
         
