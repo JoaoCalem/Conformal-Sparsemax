@@ -12,24 +12,12 @@ class Datasets(ABC):
             calibration_samples: int = 3000,
             norm: bool = True
             ):
-        
-        data_class, transform = self._dataset(norm)
 
-        train_dataset = data_class(
-            root="data",
-            train=True,
-            download=True,
-            transform=transform
-        )
+        train_dataset = self._get_dataset(norm, train=True)
         self._train_splits(train_dataset,
                            calibration_samples,valid_ratio, batch_size)
 
-        test_dataset = data_class(
-            root="data",
-            train=False,
-            download=True,
-            transform=transform
-        )
+        test_dataset = self._get_dataset(norm, train=False)
         self._test = DataLoader(test_dataset, batch_size=batch_size)
     
     @property
@@ -63,6 +51,15 @@ class Datasets(ABC):
             transform = transforms.Compose([transforms.ToTensor()])
         
         return data_class, transform
+    
+    def _get_dataset(self, norm, train=True):
+        data_class, transform = self._dataset(norm)
+        return data_class(
+            root="data",
+            train=train,
+            download=True,
+            transform=transform
+        )
 
     def _train_splits(self, train_dataset,
                       calibration_samples, valid_ratio, batch_size):
