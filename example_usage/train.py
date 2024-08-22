@@ -22,7 +22,7 @@ torch.backends.cudnn.benchmark = False
 os.environ["PYTHONHASHSEED"] = str(seed)
 print(f"Random seed set as {seed}")
 
-
+print('changed')
 
 #loss = 'sparsemax' #sparsemax or softmax
 #dataset = 'CIFAR10' #CIFARx =100 or MNIST
