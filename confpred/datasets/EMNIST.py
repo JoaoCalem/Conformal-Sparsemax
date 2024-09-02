@@ -15,7 +15,10 @@ class EMNIST(Datasets):
     
     def _dataset_class(self):
         data_class = torchvision.datasets.EMNIST
-        normalize = transforms.Normalize(0.5, 0.5)
+        normalize = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.ToTensor()
+        ])
         return data_class, normalize
     
     def _get_dataset(self, norm, train=True):

@@ -1,8 +1,11 @@
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+import math
 
 from abc import ABC, abstractmethod
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Datasets(ABC):
     def __init__(
@@ -73,8 +76,8 @@ class Datasets(ABC):
             generator=gen
         )
 
-        nb_train = int((1.0 - valid_ratio) * len(train_dataset))
-        nb_valid = int(valid_ratio * len(train_dataset))
+        nb_train = int(math.ceil((1.0 - valid_ratio) * len(train_dataset)))
+        nb_valid = int(math.floor((valid_ratio * len(train_dataset))))
         train_dataset, dev_dataset = torch.utils.data.dataset.random_split(
             train_dataset, [nb_train, nb_valid], generator=gen
         )
