@@ -1,6 +1,6 @@
 
 from confpred.classifier import CNN, train, evaluate
-from confpred.datasets import CIFAR10, CIFAR100, MNIST
+from confpred.datasets import CIFAR10, CIFAR100, MNIST, ImageNet
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 import json
 import torch
@@ -27,7 +27,7 @@ print('changed')
 #loss = 'sparsemax' #sparsemax or softmax
 #dataset = 'CIFAR10' #CIFARx =100 or MNIST
 for loss in ['entmax']:
-    for dataset in ['MNIST', 'CIFAR10', 'CIFAR100']:
+    for dataset in ['ImageNet']:
         print(loss, dataset)
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(device)
@@ -40,6 +40,7 @@ for loss in ['entmax']:
             criterion = Entmax15Loss()
 
         data_class = {
+            'ImageNet': ImageNet,
             'CIFAR100': CIFAR100,
             'CIFAR10': CIFAR10,
             'MNIST': MNIST,
@@ -48,8 +49,8 @@ for loss in ['entmax']:
         data = data_class[dataset](0.2, 16, 3000, True)
 
 
-        n_class = 100 if dataset == 'CIFAR100' else 10
-        if dataset in ['CIFAR100','CIFAR10']:
+        n_class = 100 if dataset == 'CIFAR100' else 1000 if dataset == 'ImageNet' else 10
+        if dataset in ['CIFAR100','CIFAR10','ImageNet']:
             model = CNN(n_class,
                         32,
                         3,
