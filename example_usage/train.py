@@ -26,10 +26,10 @@ print('changed')
 
 #loss = 'sparsemax' #sparsemax or softmax
 #dataset = 'CIFAR10' #CIFARx =100 or MNIST
-for loss in ['entmax']:
+for loss in ['sparsemax','entmax','softmax']:
     for dataset in ['ImageNet']:
         print(loss, dataset)
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = 'cuda:1' if torch.cuda.is_available() and torch.cuda.device_count()>1 else 'cuda' if torch.cuda.is_available() else 'cpu'
         print(device)
 
         if loss == 'sparsemax':
@@ -46,13 +46,14 @@ for loss in ['entmax']:
             'MNIST': MNIST,
         }
 
-        data = data_class[dataset](0.2, 16, 3000, True)
+        data = data_class[dataset](0.2, 8, 3000, True)
 
 
         n_class = 100 if dataset == 'CIFAR100' else 1000 if dataset == 'ImageNet' else 10
+        input_size = 256 if dataset == 'ImageNet' else 32
         if dataset in ['CIFAR100','CIFAR10','ImageNet']:
             model = CNN(n_class,
-                        32,
+                        input_size,
                         3,
                         transformation=loss,
                         conv_channels=[256,512,512],

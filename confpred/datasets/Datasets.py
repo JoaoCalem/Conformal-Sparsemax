@@ -1,8 +1,11 @@
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+import math
 
 from abc import ABC, abstractmethod
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class Datasets(ABC):
     def __init__(
@@ -12,24 +15,12 @@ class Datasets(ABC):
             calibration_samples: int = 3000,
             norm: bool = True
             ):
-        
-        data_class, transform = self._dataset(norm)
 
-        train_dataset = data_class(
-            root="data",
-            train=True,
-            download=True,
-            transform=transform
-        )
+        train_dataset = self._get_dataset(norm, train=True)
         self._train_splits(train_dataset,
                            calibration_samples,valid_ratio, batch_size)
 
-        test_dataset = data_class(
-            root="data",
-            train=False,
-            download=True,
-            transform=transform
-        )
+        test_dataset = self._get_dataset(norm, train=False)
         self._test = DataLoader(test_dataset, batch_size=batch_size)
     
     @property
@@ -63,6 +54,15 @@ class Datasets(ABC):
             transform = transforms.Compose([transforms.ToTensor()])
         
         return data_class, transform
+    
+    def _get_dataset(self, norm, train=True):
+        data_class, transform = self._dataset(norm)
+        return data_class(
+            root="data",
+            train=train,
+            download=True,
+            transform=transform
+        )
 
     def _train_splits(self, train_dataset,
                       calibration_samples, valid_ratio, batch_size):
@@ -76,8 +76,8 @@ class Datasets(ABC):
             generator=gen
         )
 
-        nb_train = int((1.0 - valid_ratio) * len(train_dataset))
-        nb_valid = int(valid_ratio * len(train_dataset))
+        nb_train = int(math.ceil((1.0 - valid_ratio) * len(train_dataset)))
+        nb_valid = int(math.floor((valid_ratio * len(train_dataset))))
         train_dataset, dev_dataset = torch.utils.data.dataset.random_split(
             train_dataset, [nb_train, nb_valid], generator=gen
         )

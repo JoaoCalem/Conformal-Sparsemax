@@ -119,7 +119,6 @@ class CNN(nn.Module):
                 else:
                     x = F.relu(self._convs[i+j](x))
             x = self._dropout(self._pool(x))
-            16
         x = torch.flatten(x, 1) # flatten all dimensions except batch
         
         x = self._dropout(F.relu(self._fc1(x)))

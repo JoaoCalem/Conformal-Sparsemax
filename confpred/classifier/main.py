@@ -7,7 +7,7 @@ from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import f1_score
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:1' if torch.cuda.is_available() and torch.cuda.device_count()>1 else 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def evaluate(model, dataloader, criterion, logits=False):
     
@@ -65,7 +65,7 @@ def train(model,
               
         train_losses = []
             # zero the parameter gradients
-        for _, data in tqdm(enumerate(train_dataloader, 0)):
+        for _, data in tqdm(enumerate(train_dataloader, 0),total=len(train_dataloader)):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
             inputs = inputs.to(device)

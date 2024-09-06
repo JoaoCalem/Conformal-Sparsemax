@@ -11,7 +11,7 @@ loss = 'softmax' #sparsemax, softmax or entmax15
 transformation = 'logits'
 dataset='CIFAR100' #CIFAR100 or MNIST
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda:1' if torch.cuda.is_available() and torch.cuda.device_count()>1 else 'cuda' if torch.cuda.is_available() else 'cpu'
 
 n_class = 100 if dataset == 'CIFAR100' else 10
 if dataset in ['CIFAR100','CIFAR10']:

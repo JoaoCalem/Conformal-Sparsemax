@@ -1,1 +1,1 @@
-from confpred.ConformalPredictor.ConformalPredictor import ConformalPredictor,ConformalScore,SparseScore,SoftmaxScore
+from .ConformalPredictor import ConformalPredictor,ConformalScore,SparseScore,SoftmaxScore

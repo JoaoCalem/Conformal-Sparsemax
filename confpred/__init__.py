@@ -1,1 +1,1 @@
-from confpred.ConformalPredictor import *
+from .ConformalPredictor import *
