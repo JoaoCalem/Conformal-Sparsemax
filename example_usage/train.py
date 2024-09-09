@@ -1,5 +1,5 @@
 
-from confpred.classifier import CNN, train, evaluate
+from confpred.classifier import FineTuneViT, CNN, train, evaluate
 from confpred.datasets import CIFAR10, CIFAR100, MNIST, ImageNet
 from entmax.losses import SparsemaxLoss, Entmax15Loss
 import json
@@ -26,8 +26,9 @@ print('changed')
 
 #loss = 'sparsemax' #sparsemax or softmax
 #dataset = 'CIFAR10' #CIFARx =100 or MNIST
+model_type = 'vit' #vit or cnn
 for loss in ['sparsemax','entmax','softmax']:
-    for dataset in ['ImageNet']:
+    for dataset in ['CIFAR100']:
         print(loss, dataset)
         device = 'cuda:1' if torch.cuda.is_available() and torch.cuda.device_count()>1 else 'cuda' if torch.cuda.is_available() else 'cpu'
         print(device)
@@ -45,28 +46,34 @@ for loss in ['sparsemax','entmax','softmax']:
             'CIFAR10': CIFAR10,
             'MNIST': MNIST,
         }
-
-        data = data_class[dataset](0.2, 8, 3000, True)
+        if model_type=='vit':
+            tranforms = 'vit'
+        else:
+            transforms = 'norm'
+        data = data_class[dataset](0.2, 8, 3000, transforms)
 
 
         n_class = 100 if dataset == 'CIFAR100' else 1000 if dataset == 'ImageNet' else 10
         input_size = 256 if dataset == 'ImageNet' else 32
-        if dataset in ['CIFAR100','CIFAR10','ImageNet']:
-            model = CNN(n_class,
-                        input_size,
-                        3,
-                        transformation=loss,
-                        conv_channels=[256,512,512],
-                        convs_per_pool=2,
-                        batch_norm=True,
-                        ffn_hidden_size=1024,
-                        kernel=5,
-                        padding=2).to(device)
-        if dataset == 'MNIST':
-            model = CNN(10,
-                        28,
-                        1,
-                        transformation=loss).to(device)
+        if model_type == 'cnn':
+            if dataset in ['CIFAR100','CIFAR10','ImageNet']:
+                model = CNN(n_class,
+                            input_size,
+                            3,
+                            transformation=loss,
+                            conv_channels=[256,512,512],
+                            convs_per_pool=2,
+                            batch_norm=True,
+                            ffn_hidden_size=1024,
+                            kernel=5,
+                            padding=2).to(device)
+            if dataset == 'MNIST':
+                model = CNN(10,
+                            28,
+                            1,
+                            transformation=loss).to(device)
+        if model_type == 'vit':
+            model = FineTuneViT(n_class,transformation=loss).to(device)
             
         model, train_history, val_history, f1_history = train(model,
                                                     data.train,

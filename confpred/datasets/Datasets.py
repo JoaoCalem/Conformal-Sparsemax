@@ -3,6 +3,8 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import math
 
+from transformers import AutoImageProcessor
+
 from abc import ABC, abstractmethod
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -13,14 +15,14 @@ class Datasets(ABC):
             valid_ratio: float,
             batch_size: int,
             calibration_samples: int = 3000,
-            norm: bool = True
+            transform: str = 'norm'
             ):
 
-        train_dataset = self._get_dataset(norm, train=True)
+        train_dataset = self._get_dataset(transform, train=True)
         self._train_splits(train_dataset,
                            calibration_samples,valid_ratio, batch_size)
 
-        test_dataset = self._get_dataset(norm, train=False)
+        test_dataset = self._get_dataset(transform, train=False)
         self._test = DataLoader(test_dataset, batch_size=batch_size)
     
     @property
@@ -43,13 +45,16 @@ class Datasets(ABC):
     def _dataset_class(self):
         pass
 
-    def _dataset(self, norm):
+    def _dataset(self, transform):
         data_class, normalize = self._dataset_class()
         
-        if norm:
+        if transform == 'norm':
             transform = transforms.Compose(
                 [transforms.ToTensor(),
                 normalize])
+        elif transform == 'vit':
+            transform = lambda x: AutoImageProcessor.from_pretrained(
+                            "google/vit-base-patch16-224")(x)['pixel_values'][0]
         else:
             transform = transforms.Compose([transforms.ToTensor()])
         
