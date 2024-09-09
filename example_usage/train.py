@@ -47,7 +47,7 @@ for loss in ['sparsemax','entmax','softmax']:
             'MNIST': MNIST,
         }
         if model_type=='vit':
-            tranforms = 'vit'
+            transforms = 'vit'
         else:
             transforms = 'norm'
         data = data_class[dataset](0.2, 8, 3000, transforms)
