@@ -4,11 +4,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from entmax import sparsemax, entmax15
-
 from typing import List
 
-class CNN(nn.Module):
+from .BaseClassifier import BaseClassifier
+
+class CNN(BaseClassifier):
     """
     CNN Model for softmax or sparsemax transformations.
 
@@ -63,7 +63,7 @@ class CNN(nn.Module):
         Constructor for CNN model
         """
         
-        super().__init__() 
+        super().__init__(transformation) 
         
         self._convs_per_pool = convs_per_pool
         self._convs = nn.ModuleList([])
@@ -71,7 +71,6 @@ class CNN(nn.Module):
         self._pool = nn.MaxPool2d(2, 2)
         self._dropout = nn.Dropout(0.2)
         self._b1d = None
-        self._transformation = transformation
         
         self._setup_convolutions(input_size, padding, kernel, channels, 
             conv_channels, convs_per_pool, batch_norm)
@@ -80,8 +79,6 @@ class CNN(nn.Module):
         if batch_norm:
             self._b1d = nn.BatchNorm1d(ffn_hidden_size,0.005,0.95)
         self._fc2 = nn.Linear(ffn_hidden_size, n_classes)
-        
-        self.train()
     
     def _setup_convolutions(self, input_size, padding, kernel,
             channels, conv_channels, convs_per_pool, batch_norm):
@@ -107,7 +104,7 @@ class CNN(nn.Module):
                 self._shape += size_adjust
             self._shape = self._shape//2
     
-    def forward(self, x):
+    def __get_logits__(self, x):
         """
         Forward pass for specified transformation function on intitialisation.
         """
@@ -124,35 +121,6 @@ class CNN(nn.Module):
         x = self._dropout(F.relu(self._fc1(x)))
         if self._b1d:
             x = self._b1d(x)
-        x = self._fc2(x)
-        
-        return self._final(x)
-    
-    def eval(self):
-        """
-        Set model to evaluation mode.
-        """
-        
-        super().eval()
-        if self._transformation=='softmax':
-            self._final = lambda x: nn.Softmax(-1)(x)
-        elif self._transformation=='sparsemax':
-            self._final = lambda x: sparsemax(x,-1)
-        elif self._transformation=='entmax':
-            self._final = lambda x: entmax15(x,-1)
-    def train(self, mode=True):
-        """
-        Set model to training mode.
-        """
-        
-        super().train(mode)
-        if self._transformation=='softmax':
-            self._final = lambda x: nn.LogSoftmax(-1)(x)
-        #elif self._transformation in ['logits', 'sparsemax']:
-        else:
-            self._final = lambda x: x
-        #else:
-        #    raise Exception(
-        #        "Parameter 'transformation' must be 'softmax', 'sparsemax' ot 'logits"
-        #        )
+            
+        return self._fc2(x)
         
